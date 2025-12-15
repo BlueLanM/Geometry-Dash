@@ -31,12 +31,15 @@ let playerGraphics; // 玩家方块图形
 let groundSpeed = 300; // 地面移动速度
 let obstacleTimer; // 障碍物生成计时器
 let nextObstacleDelay = 1500; // 下一个障碍物的延迟时间
+let stars; // 星星道具组
+let starTimer; // 星星生成计时器
 
 function create() {
 	this.add.image(400, 300, "sky");
 	createGround.call(this);
 	createPlayer.call(this);
 	createObstacles.call(this);
+	createStars.call(this); // 创建星星组
 	createControls.call(this);
 
 	// 显示分数
@@ -101,6 +104,119 @@ function createObstacles() {
 
 	// 开始生成障碍物
 	scheduleNextObstacle.call(this);
+}
+
+// 创建星星道具组
+function createStars() {
+	stars = this.physics.add.group();
+
+	// 添加星星和玩家的碰撞检测
+	this.physics.add.overlap(player, stars, collectStar, null, this);
+
+	// 开始生成星星
+	scheduleNextStar.call(this);
+}
+
+// 生成星星
+function scheduleNextStar() {
+	if (gameOver) return;
+
+	// 随机延迟时间: 2000ms - 5000ms
+	const nextStarDelay = Phaser.Math.Between(2000, 5000);
+
+	starTimer = this.time.delayedCall(nextStarDelay, () => {
+		spawnStar.call(this);
+		scheduleNextStar.call(this);
+	}, [], this);
+}
+
+// 生成星星
+function spawnStar() {
+	if (gameOver) return;
+
+	// 随机高度（在空中）
+	const starY = Phaser.Math.Between(400, 500);
+
+	// 创建星星精灵
+	const star = stars.create(850, starY, "star");
+	star.setScale(0.8); // 调整星星大小
+	star.setVelocityX(-groundSpeed);
+	star.body.allowGravity = false;
+
+	// 添加闪烁动画
+	this.tweens.add({
+		alpha: 0.4,
+		duration: 500,
+		repeat: -1,
+		targets: star,
+		yoyo: true
+	});
+
+	// 添加轻微的上下浮动
+	this.tweens.add({
+		duration: 800,
+		ease: "Sine.easeInOut",
+		repeat: -1,
+		targets: star,
+		y: starY + 10,
+		yoyo: true
+	});
+}
+
+// 收集星星
+function collectStar(player, star) {
+	// 增加5分
+	score += 5;
+	scoreText.setText("分数: " + score);
+
+	// 创建收集特效
+	createStarCollectEffect.call(this, star.x, star.y);
+
+	// 销毁星星
+	star.destroy();
+}
+
+// 创建星星收集特效
+function createStarCollectEffect(x, y) {
+	// 创建闪光效果
+	const sparkles = [];
+
+	for (let i = 0; i < 8; i++) {
+		const angle = (i / 8) * Math.PI * 2;
+		const sparkle = this.add.circle(x, y, 3, 0xFFFF00);
+
+		sparkles.push({
+			sprite: sparkle,
+			velocityX: Math.cos(angle) * 150,
+			velocityY: Math.sin(angle) * 150
+		});
+	}
+
+	// 动画
+	let elapsed = 0;
+	const animationTimer = this.time.addEvent({
+		callback: () => {
+			elapsed += 16;
+			const delta = 16 / 1000;
+
+			sparkles.forEach(sparkle => {
+				sparkle.sprite.x += sparkle.velocityX * delta;
+				sparkle.sprite.y += sparkle.velocityY * delta;
+
+				// 淡出
+				const alpha = Math.max(0, 1 - elapsed / 500);
+				sparkle.sprite.setAlpha(alpha);
+			});
+
+			// 0.5秒后清理
+			if (elapsed >= 500) {
+				sparkles.forEach(sparkle => sparkle.sprite.destroy());
+				animationTimer.remove();
+			}
+		},
+		delay: 16,
+		loop: true
+	});
 }
 
 // 下一个障碍物的生成
@@ -208,6 +324,7 @@ function spawnObstacle() {
 	obstacle.setImmovable(true);
 	obstacle.body.allowGravity = false;
 }
+
 
 // 碰撞处理
 function hitObstacle(player, obstacle) {
@@ -350,6 +467,7 @@ function jump() {
 function preload() {
 	this.load.image("sky", "assets/sky.png");
 	this.load.image("ground", "assets/platform.png");
+	this.load.image("star", "assets/star.png");
 }
 
 function update() {
@@ -366,6 +484,13 @@ function update() {
 		}
 		isJumping = false;
 	}
+
+	// 清理超出屏幕的星星
+	stars.children.entries.forEach(star => {
+		if (star.x < -50) {
+			star.destroy();
+		}
+	});
 
 	// 清理超出屏幕的障碍物
 	obstacles.children.entries.forEach(obstacle => {
