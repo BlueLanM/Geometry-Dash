@@ -68,7 +68,7 @@ function createGround() {
 	platforms.create(400, 568, "ground").setScale(2).refreshBody();
 }
 
-// 创建玩家 - 几何冲刺风格的方块
+// 创建玩家
 function createPlayer() {
 	// 创建方块玩家图形
 	const graphics = this.add.graphics();

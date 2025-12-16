@@ -1,12 +1,173 @@
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
 body {
 	display: flex;
+	overflow: hidden;
+	position: relative;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	min-height: 100vh;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.title{
-	margin-top: 20px ;
+/* 动态背景装饰 */
+body::before {
+	position: absolute;
+	right: -250px;
+	top: -250px;
+	border-radius: 50%;
+	width: 500px;
+	height: 500px;
+	background: rgba(255, 255, 255, 0.1);
+	content: '';
+	animation: float 6s ease-in-out infinite;
 }
-.subtitle{
-	margin-bottom: 20px ;
+body::after {
+	position: absolute;
+	left: -150px;
+	bottom: -150px;
+	border-radius: 50%;
+	width: 300px;
+	height: 300px;
+	background: rgba(255, 255, 255, 0.08);
+	content: '';
+	animation: float 8s ease-in-out infinite reverse;
+}
+@keyframes float {
+	0%, 100% {
+		transform: translateY(0) translateX(0);
+	}
+	50% {
+		transform: translateY(-20px) translateX(20px);
+	}
+}
+/* 主容器 */
+.game-header {
+	position: relative;
+	z-index: 10;
+	margin-bottom: 50px;
+	padding: 40px;
+	border-radius: 30px;
+	max-width: 600px;
+	background: rgba(255, 255, 255, 0.95);
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(10px);
+	text-align: center;
+	animation: slidedown 0.8s ease-out;
+}
+@keyframes slidedown {
+	from {
+		opacity: 0;
+		transform: translateY(-50px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+.title {
+	display: inline-block;
+	position: relative;
+	margin-bottom: 20px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	background-clip: text;
+	text-transform: uppercase;
+	font-weight: 900;
+	font-size: 3.5em;
+	letter-spacing: 3px;
+	animation: pulse 2s ease-in-out infinite;
+	-webkit-text-fill-color: transparent;
+}
+@keyframes pulse {
+	0%, 100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+}
+.title::after {
+	position: absolute;
+	left: 50%;
+	bottom: -10px;
+	border-radius: 2px;
+	width: 80%;
+	height: 4px;
+	background: linear-gradient(90deg, transparent, #667eea, transparent);
+	content: '';
+	transform: translateX(-50%);
+}
+.subtitle {
+	display: inline-block;
+	margin-top: 20px;
+	padding: 15px 30px;
+	border-radius: 50px;
+	background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+	font-weight: 500;
+	font-size: 1.2em;
+	color: #555;
+	animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-5px);
+	}
+}
+/* 几何装饰元素 */
+.geo-cube {
+	position: absolute;
+	z-index: 1;
+	border: 2px solid rgba(255, 255, 255, 0.5);
+	width: 50px;
+	height: 50px;
+	background: rgba(255, 255, 255, 0.2);
+	animation: rotate3d 4s linear infinite;
+}
+.cube1 {
+	left: 10%;
+	top: 10%;
+	animation-delay: 0s;
+}
+.cube2 {
+	right: 15%;
+	top: 70%;
+	animation-delay: 1s;
+}
+.cube3 {
+	left: 5%;
+	top: 40%;
+	animation-delay: 2s;
+}
+@keyframes rotate3d {
+	0% {
+		transform: rotate(0deg) scale(1);
+	}
+	50% {
+		transform: rotate(180deg) scale(1.2);
+	}
+	100% {
+		transform: rotate(360deg) scale(1);
+	}
+}
+/* 响应式设计 */
+@media (max-width: 768px) {
+	.title {
+		font-size: 2.5em;
+	}
+	.subtitle {
+		padding: 12px 25px;
+		font-size: 1em;
+	}
+	.game-header {
+		margin: 20px;
+		padding: 30px 20px;
+	}
 }
